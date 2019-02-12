@@ -122,6 +122,7 @@ WIN_SPARKLE_API void __cdecl win_sparkle_set_lang(const char *lang)
     try
     {
         Settings::SetLanguage(lang);
+        UI::RefreshTranslations();
     }
     CATCH_ALL_EXCEPTIONS
 }
