@@ -122,6 +122,7 @@ WIN_SPARKLE_API void __cdecl win_sparkle_set_lang(const char *lang)
     try
     {
         Settings::SetLanguage(lang);
+        UI::RefreshTranslations();
     }
     CATCH_ALL_EXCEPTIONS
 }
@@ -377,5 +378,14 @@ WIN_SPARKLE_API void __cdecl win_sparkle_check_update_without_ui()
     CATCH_ALL_EXCEPTIONS
 }
 
+WIN_SPARKLE_API bool __cdecl win_sparkle_is_processing()
+{
+    try
+    {
+        return UI::IsDialogOpened();
+    }
+    CATCH_ALL_EXCEPTIONS
+    return false;
+}
 
 } // extern "C"
