@@ -1178,6 +1178,8 @@ const int MSG_UPDATE_DOWNLOADED = wxNewId();
 // Tell the UI to ask for permission to check updates
 const int MSG_ASK_FOR_PERMISSION = wxNewId();
 
+// Refresh translations
+const int MSG_REFRESH_TRANSLATIONS = wxNewId();
 
 /*--------------------------------------------------------------------------*
                                 Application
@@ -1194,6 +1196,7 @@ public:
     // Sends a message with ID @a msg to the app.
     void SendMsg(int msg, EventPayload *data = NULL);
 
+    bool IsWindowShowed() { return m_win != NULL; }
 private:
     void InitWindow();
     void ShowWindow();
@@ -1207,6 +1210,7 @@ private:
     void OnDownloadProgress(wxThreadEvent& event);
     void OnUpdateDownloaded(wxThreadEvent& event);
     void OnAskForPermission(wxThreadEvent& event);
+    void OnRefreshAppTranslations(wxThreadEvent& event);
 
 private:
     UpdateDialog *m_win;
@@ -1242,6 +1246,7 @@ App::App()
     Bind(wxEVT_COMMAND_THREAD, &App::OnDownloadProgress, this, MSG_DOWNLOAD_PROGRESS);
     Bind(wxEVT_COMMAND_THREAD, &App::OnUpdateDownloaded, this, MSG_UPDATE_DOWNLOADED);
     Bind(wxEVT_COMMAND_THREAD, &App::OnAskForPermission, this, MSG_ASK_FOR_PERMISSION);
+    Bind(wxEVT_COMMAND_THREAD, &App::OnRefreshAppTranslations, this, MSG_REFRESH_TRANSLATIONS);
 }
 
 
@@ -1406,6 +1411,26 @@ void App::OnAskForPermission(wxThreadEvent& event)
         // same as in win_sparkle_init()
         UpdateChecker *check = new PeriodicUpdateChecker();
         check->Start();
+    }
+}
+
+void App::OnRefreshAppTranslations(wxThreadEvent& event)
+{
+    wxTranslations * trans = wxTranslations::Get();
+    if (trans != NULL) {
+        Settings::Lang langset = Settings::GetLanguage();
+        wxString language = langset.lang;
+        if (language.IsEmpty() || language.StartsWith("en"))
+        {
+            wxTranslations::Set(new wxTranslations());
+            wxTranslations::Get()->SetLoader(new DllTranslationsLoader());
+        }
+        else
+        {
+            language.Replace("-", "_");
+            trans->SetLanguage(language);
+            trans->AddCatalog("winsparkle");
+        }
     }
 }
 
@@ -1598,5 +1623,23 @@ void UI::AskForPermission()
     UIThreadAccess uit;
     uit.App().SendMsg(MSG_ASK_FOR_PERMISSION);
 }
+
+
+/*static*/
+bool UI::IsDialogOpened()
+{
+    UIThreadAccess uit;
+
+    return uit.App().IsWindowShowed();
+}
+
+
+/*static*/
+void UI::RefreshTranslations()
+{
+    UIThreadAccess uit;
+    uit.App().SendMsg(MSG_REFRESH_TRANSLATIONS);
+}
+
 
 } // namespace winsparkle
