@@ -1196,6 +1196,7 @@ public:
     // Sends a message with ID @a msg to the app.
     void SendMsg(int msg, EventPayload *data = NULL);
 
+    bool IsWindowShowed() { return m_win != NULL; }
 private:
     void InitWindow();
     void ShowWindow();
@@ -1621,6 +1622,15 @@ void UI::AskForPermission()
 {
     UIThreadAccess uit;
     uit.App().SendMsg(MSG_ASK_FOR_PERMISSION);
+}
+
+
+/*static*/
+bool UI::IsDialogOpened()
+{
+    UIThreadAccess uit;
+
+    return uit.App().IsWindowShowed();
 }
 
 

@@ -105,6 +105,11 @@ public:
     static void AskForPermission();
 
     /**
+        Check if some window is opened
+    */
+    static bool IsDialogOpened();
+
+    /**
         Signal to reload translations after the language has changed
     */
     static void RefreshTranslations();
